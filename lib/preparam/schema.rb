@@ -1,4 +1,4 @@
-module Spotcheck
+module Preparam
   class TypeOptionError < StandardError
   end
 

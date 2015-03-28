@@ -1,4 +1,4 @@
-# Spotcheck
+# Preparam
 
 Every body seems to hate [rails/strong_parameters](https://github.com/rails/strong_parameters) for quite a few good reasons. I think a brief page of rails history need to be explained as to why it exists in the first place. Strong parameters was put in place to fix the problem of mass assignment. In previous versions of rails (< INSERT VERSION HERE), it was possible to set all attributes at once on a model. This seemed like a very convenient way to update a model attributes, however it is a double edged sword. Let's say we wanted to update our user model attributes in the edit profile page. We would have the following action :
 
@@ -49,13 +49,13 @@ class UserController
 end
 ```
 
-What if we have a more complex schema of parameters that we would want to validate with certain conditions. Let's take a checkout model. A checkout has many things attached to it: customer billing address, shipping address, applied gift cards, discount codes, line items, etc. What if we wanted to require the gift card code only if the gift card array is supplied. This is currently impossible with strong parameters has it doesn't serve this purpose. The validation would have to be done manually and the attributes updated manually. What spotcheck aims to provide is a validation mechanism for the parameters provided and prevent mass assignment at the same time.
+What if we have a more complex schema of parameters that we would want to validate with certain conditions. Let's take a checkout model. A checkout has many things attached to it: customer billing address, shipping address, applied gift cards, discount codes, line items, etc. What if we wanted to require the gift card code only if the gift card array is supplied. This is currently impossible with strong parameters has it doesn't serve this purpose. The validation would have to be done manually and the attributes updated manually. What preparam aims to provide is a validation mechanism for the parameters provided and prevent mass assignment at the same time.
 
-Here are some example as to how this complex schema could be solved with spotcheck.
+Here are some example as to how this complex schema could be solved with preparam.
 
 ```ruby
 # defining the schema as a block
-params.spotcheck do
+params.preparam do
   required :token, is_a: String
 
   optional :line_items, is_a: Array do
@@ -76,7 +76,7 @@ end
 
 ```ruby
 # defining a custom schema
-class CheckoutSchema < Spotcheck::Schema
+class CheckoutSchema < Preparam::Schema
   required :token, is_a: String
 
   optional :line_items, is_a: Array do
@@ -94,12 +94,12 @@ class CheckoutSchema < Spotcheck::Schema
   end
 end
 
-params.spotcheck_with CheckoutSchema.new
+params.preparam_with CheckoutSchema.new
 ```
 
 ```ruby
 # defining fragments
-class CheckoutSchema < Spotcheck::Schema
+class CheckoutSchema < Preparam::Schema
   required :token
   use GiftCardsSchema
   use DiscountsSchema
@@ -109,14 +109,14 @@ end
 
 By default, when the parameters does not respond to the specified schema, errors are raised. If an ActiveModel
 is passed, the errors are added to the model to the specified attribute if the models has it. It will raise a
-Spotcheck::InvalidParameterError which can be catched by rails and render a :bad_request response.
+Preparam::InvalidParameterError which can be catched by rails and render a :bad_request response.
 
 # Installation
 
 Brave enough to try it? Add the following in your `Gemfile`.
 
 ```
-gem 'spotcheck', github: 'maximbedard/spotcheck'
+gem 'preparam', github: 'maximbedard/preparam'
 ```
 
 # Usage

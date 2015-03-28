@@ -3,11 +3,11 @@ require 'active_support/core_ext'
 require 'action_controller'
 require 'active_model'
 
-require 'spotcheck/version'
-require 'spotcheck/attribute'
+require 'preparam/version'
+require 'preparam/attribute'
 
-module Spotcheck
-  autoload :Schema, 'spotcheck/schema'
+module Preparam
+  autoload :Schema, 'preparam/schema'
 end
 
 
@@ -15,7 +15,7 @@ module ActionController
   class Base
     def params
       return super unless block_given?
-      Spotcheck::Schema.new(super, nil, &block)
+      Preparam::Schema.new(super, nil, &block)
     end
   end
 end

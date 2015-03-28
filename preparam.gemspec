@@ -1,13 +1,13 @@
 $LOAD_PATH.unshift File.expand_path('../lib', __FILE__)
 
-require 'spotcheck/version'
+require 'preparam/version'
 
 Gem::Specification.new do |s|
-  s.name        = 'spotcheck'
-  s.version     = Spotcheck::VERSION
+  s.name        = 'preparam'
+  s.version     = Preparam::VERSION
   s.authors     = ['Maxime Bedard']
   s.email       = ['maxim3.bedard@gmail.com']
-  s.homepage    = 'http://github.com/maximebedard/spotcheck'
+  s.homepage    = 'http://github.com/maximebedard/preparam'
   s.summary     = 'Opinionated parameters validation, even more than rails/strong_parameters'
   s.description = 'Add parameter validation over rails/strong_parameters'
   s.license     = 'MIT'

@@ -3,7 +3,7 @@ require 'test_helper'
 class SchemaTest < Minitest::Test
   def setup
     @params = ActionController::Parameters.new(name: 'maximebedard')
-    @subject = Spotcheck::Schema.new(@params, nil) do
+    @subject = Preparam::Schema.new(@params, nil) do
       requires :token, is_a: String, default: 'n/a'
       requires :name, is_a: String
 
