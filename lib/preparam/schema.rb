@@ -7,56 +7,45 @@ module Preparam
 
   class Schema
     include ActiveModel::Validations
-    include Attribute
+    include Virtus.model
 
-    RESERVED_OPTIONS = %i(is_a default)
+    RESERVED_OPTIONS = %i(default)
 
-    attr_reader :parent, :params, :children
+    class << self
+      def permits(name, type, **options, &block)
+        type       = build_nested_type(name, type, &block) if block_given?
+        validators = options.except(*RESERVED_OPTIONS)
 
-    def initialize(params, parent, &block)
-      @params = params
-      @parent = parent
-      @children = []
-      @attributes = []
+        build_attribute(name, type, options)
+        build_validators(name, validators)
+      end
 
-      if block_given? && block.arity == 1
-        yield self
-      else
-        instance_eval(&block)
+      def requires(name, type, **options, &block)
+        permits(name, type, options.merge(presence: false), &block)
+      end
+
+      def use
+        raise NotImplementedError
+      end
+
+      private
+
+      def build_nested_type(name, type, &block)
+        raise TypeOptionError.new("Invalid type '#{type}'") unless [Array, Hash].include?(type)
+        Class.new(self, &block)
+      end
+
+      def build_attribute(name, type, **options)
+        attribute name, type, options.slice(*RESERVED_OPTIONS)
+      end
+
+      def build_validators(name, validators)
+        validates name, validators unless validators.empty?
       end
     end
 
-    def permits(param, **options, &block)
-      validators = options.except(RESERVED_OPTIONS)
-
-      build_nested_schema(param, options, &block) if block_given?
-      build_attribute(param, options[:is_a], params.try(:[], param), options[:default])
-    end
-
-    def requires(param, **options, &block)
-      permits(param, options.merge(presence: false), &block)
-    end
-
-    def use(schema)
-      raise NotImplementedError
-    end
-
-    def valid?
-      super && @children.each(&:valid?).all?
-    end
-    alias_method :validate, :valid?
-
     def valid!
       raise ValidationFailedError unless valid?
-    end
-
-    private
-
-    def build_nested_schema(param, **options, &block)
-      type = options[:is_a]
-      raise TypeOptionError unless [Array, Hash].include?(type)
-
-      @children << Schema.new(params.try(:[], param), self, &block)
     end
   end
 end

@@ -1,31 +1,38 @@
 require 'test_helper'
 
 class SchemaTest < Minitest::Test
-  def setup
-    @params = ActionController::Parameters.new(name: 'maximebedard')
-    @subject = Preparam::Schema.new(@params, nil) do
-      requires :token, is_a: String, default: 'n/a'
-      requires :name, is_a: String
 
-      permits :line_items, is_a: Array do
-        requires :variant_id, is_a: Integer
-        requires :quantity, is_a: Integer
-        permits :properties, is_a: Hash
-      end
+  class TestSchema < Preparam::Schema
+    requires :token, String, default: 'n/a'
+    requires :name, String
 
-      permits :gift_cards, is_a: Array do
-        requires :code, is_a: String
-      end
-
-      permits :discount, is_a: Hash do
-        requires :code, is_a: String
-      end
+    permits :line_items, Array do
+      requires :variant_id, Integer, default: 0
+      requires :quantity, Integer
+      permits :properties, Hash
     end
+
+    permits :gift_cards, Array do
+      requires :code, String
+    end
+
+    permits :discount, Hash do
+      requires :code, String
+    end
+  end
+
+  def setup
+    @subject = TestSchema.new(name: 'maximebedard')
   end
 
   def test_builded_attributes
     assert_respond_to @subject, :name
     assert_equal @subject.name, 'maximebedard'
+  end
+
+  def test_builded_nested_attributes
+    assert_respond_to @subject.line_items
+    assert_respond_to @subject.line_items
   end
 
   def test_default_value_for_attributes
