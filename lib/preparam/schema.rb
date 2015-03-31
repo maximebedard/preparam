@@ -20,7 +20,7 @@ module Preparam
         build_validators(name, validators)
       end
 
-      def requires(name, type, **options, &block)
+      def requires(name, type = nil, **options, &block)
         permits(name, type, options.merge(presence: false), &block)
       end
 
@@ -30,7 +30,7 @@ module Preparam
 
       private
 
-      def build_nested_type(name, type, &block)
+      def build_nested_type(name, &block)
         raise TypeOptionError.new("Invalid type '#{type}'") unless [Array, Hash].include?(type)
         Class.new(self, &block)
       end
