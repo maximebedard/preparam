@@ -2,31 +2,35 @@ require 'test_helper'
 
 class SchemaTest < Minitest::Test
 
-  class TestSchema < Preparam::Schema
-    requires :token, String, default: 'n/a'
-    requires :name, String
+  class CartSchema < Preparam::Schema
+    mandatory :token, String, default: 'n/a'
+    mandatory :name, String
 
-    permits :line_items, Array do
-      requires :variant_id, Integer
-      requires :quantity, Integer
-      permits :properties, Hash, default: {}
+    optional :line_items, Array do
+      mandatory :variant_id, Integer
+      mandatory :quantity, Integer
+      optional :properties, Hash, default: {}
+      optional :adjustments, Array do
+        optional :price, Money
+      end
     end
 
-    permits :gift_cards, Array do
-      requires :code, String
+    optional :gift_cards, Array do
+      mandatory :code, String
     end
 
-    permits :discount, Hash do
-      requires :code, String
-      requires :promotion_code, String, default: '50_percent_off'
+    optional :discount, Hash do
+      mandatory :code, String
     end
   end
 
   def setup
-    @params = ActionController::Parameters(name: 'maximebedard',
-      line_items: [variant_id:1, quantity:3, properties: {}],
-      discount: { code: 'my_awesome_code' })
-    @subject = TestSchema.new(@params)
+    @params = {
+      name: 'maximebedard',
+      line_items: [{variant_id:1, quantity:3, properties: {}}],
+      discount: { code: 'my_awesome_code' }
+    }
+    @subject = CartSchema.new(@params)
   end
 
   def test_attributes
@@ -40,7 +44,10 @@ class SchemaTest < Minitest::Test
   end
 
   def test_nested_array_attributes
-    assert_respond_to @subject.line_items[0].variant_id
+    assert_respond_to @subject, :line_items
+    assert_instance_of Array, @subject.line_items
+    refute_empty @subject.line_items
+    assert_respond_to @subject.line_items[0], :variant_id
     assert_equal @subject.line_items[0].variant_id, 1
   end
 
@@ -53,17 +60,5 @@ class SchemaTest < Minitest::Test
     assert_respond_to @subject, :discount
     assert_respond_to @subject.discount, :code
     assert_equal @subject.discount.code, 'my_awesome_code'
-  end
-
-  def test_default_value_for_nested_hash_attributes
-    assert_respond_to @subject, :discount
-    assert_respond_to @subject.discount, :promotion_code
-    assert_respond_to @subject.discount.promotion_code, '50_percent_off'
-  end
-
-  def test_required
-  end
-
-  def test_permitted
   end
 end

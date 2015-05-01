@@ -12,7 +12,7 @@ module Preparam
     RESERVED_OPTIONS = %i(default)
 
     class << self
-      def permits(name, type, **options, &block)
+      def optional(name, type, **options, &block)
         type       = build_nested_type(name, type, &block) if block_given?
         validators = options.except(*RESERVED_OPTIONS)
 
@@ -20,8 +20,8 @@ module Preparam
         build_validators(name, validators)
       end
 
-      def requires(name, type = nil, **options, &block)
-        permits(name, type, options.merge(presence: false), &block)
+      def mandatory(name, type, **options, &block)
+        optional(name, type, options.merge(presence: true), &block)
       end
 
       def use
@@ -30,9 +30,14 @@ module Preparam
 
       private
 
-      def build_nested_type(name, &block)
-        raise TypeOptionError.new("Invalid type '#{type}'") unless [Array, Hash].include?(type)
-        Class.new(self, &block)
+      def build_nested_type(name, type, &block)
+        if type == Array
+          Array[Class.new(self, &block)]
+        elsif type == Hash
+          Class.new(self, &block)
+        else
+          raise TypeOptionError.new("Invalid type '#{type}'")
+        end
       end
 
       def build_attribute(name, type, **options)

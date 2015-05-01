@@ -55,6 +55,8 @@ GEM
     method_source (0.8.2)
     mini_portile (0.6.2)
     minitest (5.5.1)
+    money (6.5.1)
+      i18n (>= 0.6.4, <= 0.7.0)
     nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
     pry (0.10.1)
@@ -90,5 +92,6 @@ PLATFORMS
 
 DEPENDENCIES
   minitest
+  money
   preparam!
   pry-byebug

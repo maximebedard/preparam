@@ -1,5 +1,12 @@
 # Preparam
 
+*Validation by contract for rails parameters*
+
+# Introduction
+
+
+
+
 Every body seems to hate [rails/strong_parameters](https://github.com/rails/strong_parameters) for quite a few good reasons. I think a brief page of rails history need to be explained as to why it exists in the first place. Strong parameters was put in place to fix the problem of mass assignment. In previous versions of rails (< INSERT VERSION HERE), it was possible to set all attributes at once on a model. This seemed like a very convenient way to update a model attributes, however it is a double edged sword. Let's say we wanted to update our user model attributes in the edit profile page. We would have the following action :
 
 ```ruby
