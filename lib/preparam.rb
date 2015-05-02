@@ -4,10 +4,12 @@ require 'active_model'
 require 'virtus'
 
 require 'preparam/version'
+require 'preparam/validators/associated_validator'
+require 'preparam/validators/coercion_validator'
 require 'preparam/schema'
 
 module Preparam
-  module Ext
+  module Extensions
     def preparam
     end
 
@@ -16,4 +18,4 @@ module Preparam
   end
 end
 
-ActionController::Base.include Preparam::Ext
+ActionController::Base.include Preparam::Extensions

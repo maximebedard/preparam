@@ -61,4 +61,36 @@ class SchemaTest < Minitest::Test
     assert_respond_to @subject.discount, :code
     assert_equal @subject.discount.code, 'my_awesome_code'
   end
+
+  class SimpleMandatorySchema < Preparam::Schema
+    mandatory :name, String
+  end
+
+  def test_mandatory_parameter_not_present
+    refute SimpleMandatorySchema.new.valid?
+  end
+
+  def test_mandatory_parameter_present
+    assert SimpleMandatorySchema.new(name: 'Bedard').valid?
+  end
+
+  def test_mandatory_parameter_coercion
+    refute SimpleMandatorySchema.new(name: {}).valid?
+  end
+
+  class SimpleOptionalSchema < Preparam::Schema
+    optional :name, String
+  end
+
+  def test_optional_parameter_not_present
+    assert SimpleOptionalSchema.new.valid?
+  end
+
+  def test_optional_parameter_present
+    assert SimpleOptionalSchema.new(name: 'Bedard').valid?
+  end
+
+  def test_optional_parameter_coercion
+    refute SimpleOptionalSchema.new(name: {}).valid?
+  end
 end

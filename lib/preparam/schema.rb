@@ -8,16 +8,18 @@ module Preparam
   class Schema
     include ActiveModel::Validations
     include Virtus.model
+    include Validators
 
-    RESERVED_OPTIONS = %i(default)
+    RESERVED_ATTRIBUTE_OPTIONS = %i(default)
 
     class << self
       def optional(name, type, **options, &block)
-        type       = build_nested_type(name, type, &block) if block_given?
-        validators = options.except(*RESERVED_OPTIONS)
+        options.reverse_merge!(coercion: true)
+
+        type = build_nested_type(name, type, options, &block) if block_given?
 
         build_attribute(name, type, options)
-        build_validators(name, validators)
+        build_validations(name, options)
       end
 
       def mandatory(name, type, **options, &block)
@@ -30,7 +32,8 @@ module Preparam
 
       private
 
-      def build_nested_type(name, type, &block)
+      def build_nested_type(name, type, **options, &block)
+        options.merge!(associated: true)
         if type == Array
           Array[Class.new(self, &block)]
         elsif type == Hash
@@ -41,10 +44,11 @@ module Preparam
       end
 
       def build_attribute(name, type, **options)
-        attribute name, type, options.slice(*RESERVED_OPTIONS)
+        attribute name, type, options.slice(*RESERVED_ATTRIBUTE_OPTIONS)
       end
 
-      def build_validators(name, validators)
+      def build_validations(name, **options)
+        validators = options.except(*RESERVED_ATTRIBUTE_OPTIONS)
         validates name, validators unless validators.empty?
       end
     end
