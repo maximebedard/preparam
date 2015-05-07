@@ -16,7 +16,10 @@ module Preparam
       def optional(name, type, **options, &block)
         options.reverse_merge!(coercion: true)
 
-        type = build_nested_type(name, type, options, &block) if block_given?
+        if block_given?
+          type = build_nested_type(type, &block)
+          options.reverse_merge!(associated: true)
+        end
 
         build_attribute(name, type, options)
         build_validations(name, options)
@@ -26,18 +29,28 @@ module Preparam
         optional(name, type, options.merge(presence: true), &block)
       end
 
+      def anything(name, type, **options, &block)
+        options.reverse_merge!(associated: false, coercion: false)
+        optional(name, type, options, &block)
+      end
+
       def use
         raise NotImplementedError
       end
 
       private
 
-      def build_nested_type(name, type, **options, &block)
-        options.merge!(associated: true)
+      def build_nested_type(type, &block)
+        anon = Class.new(self, &block).tap do
+          def self.model_name
+            ActiveModel::Name.new(self, nil, "temp")
+          end
+        end
+
         if type == Array
-          Array[Class.new(self, &block)]
+          Array[anon]
         elsif type == Hash
-          Class.new(self, &block)
+          anon
         else
           raise TypeOptionError.new("Invalid type '#{type}'")
         end
