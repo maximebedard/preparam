@@ -1,10 +1,4 @@
 module Preparam
-  class TypeOptionError < StandardError
-  end
-
-  class ValidationFailedError < StandardError
-  end
-
   class Schema
     include ActiveModel::Validations
     include Virtus.model
@@ -67,7 +61,7 @@ module Preparam
     end
 
     def valid!
-      raise ValidationFailedError unless valid?
+      raise ValidationFailedError(errors) unless valid?
     end
   end
 end

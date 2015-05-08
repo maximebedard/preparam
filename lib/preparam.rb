@@ -4,6 +4,7 @@ require 'active_model'
 require 'virtus'
 
 require 'preparam/version'
+require 'preparam/errors'
 require 'preparam/validators/associated_validator'
 require 'preparam/validators/coercion_validator'
 require 'preparam/schema'

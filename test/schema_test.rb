@@ -26,7 +26,7 @@ class SchemaTest < Minitest::Test
 
   def setup
     @params = {
-      name: 'maximeGarry',
+      name: 'Garry',
       line_items: [{variant_id:1, quantity:3, properties: {}}],
       discount: { code: 'my_awesome_code' }
     }
@@ -35,7 +35,7 @@ class SchemaTest < Minitest::Test
 
   def test_attributes
     assert_respond_to @subject, :name
-    assert_equal @subject.name, 'maximeGarry'
+    assert_equal @subject.name, 'Garry'
   end
 
   def test_default_value_for_attributes
@@ -67,7 +67,9 @@ class SchemaTest < Minitest::Test
   end
 
   def test_mandatory_parameter_not_present
-    refute SimpleMandatorySchema.new.valid?
+    s = SimpleMandatorySchema.new
+    refute s.valid?
+    assert_match /blank/, s.errors[:name][0]
   end
 
   def test_mandatory_parameter_present
@@ -75,7 +77,9 @@ class SchemaTest < Minitest::Test
   end
 
   def test_mandatory_parameter_coercion
-    refute SimpleMandatorySchema.new(name: {}).valid?
+    s = SimpleMandatorySchema.new(name: { fullname: "bonjour" })
+    refute s.valid?
+    assert_match /invalid/, s.errors[:name][0]
   end
 
   class SimpleOptionalSchema < Preparam::Schema
@@ -91,7 +95,9 @@ class SchemaTest < Minitest::Test
   end
 
   def test_optional_parameter_coercion
-    refute SimpleOptionalSchema.new(name: {}).valid?
+    s = SimpleOptionalSchema.new(name: {})
+    refute s.valid?
+    assert_match /invalid/, s.errors[:name][0]
   end
 
   class NestedHashMandatorySchema < Preparam::Schema
@@ -101,7 +107,9 @@ class SchemaTest < Minitest::Test
   end
 
   def test_nested_hash_mandatory_not_present
-    refute NestedHashMandatorySchema.new(address: {}).valid?
+    s = NestedHashMandatorySchema.new(address: {})
+    refute s.valid?
+    assert_match /blank/, s.errors[:address][0]
   end
 
   def test_nested_hash_mandatory_present
@@ -129,7 +137,9 @@ class SchemaTest < Minitest::Test
   end
 
   def test_nested_array_mandatory_not_present
-    refute NestedArrayMandatorySchema.new(shipping_addresses:[]).valid?
+    s = NestedArrayMandatorySchema.new(shipping_addresses:[])
+    refute s.valid?
+    assert_match /blank/, s.errors[:shipping_addresses][0]
   end
 
   def test_nested_array_mandatory_present
@@ -148,5 +158,45 @@ class SchemaTest < Minitest::Test
 
   def test_nested_array_optional_present
     assert NestedArrayOptionalSchema.new(addresses: [{ last_name: 'Johnson' }]).valid?
+  end
+
+  class OptionalHashWithMandatorySchema < Preparam::Schema
+    optional :address, Hash do
+      mandatory :zip, String
+    end
+  end
+
+  def test_optional_hash_with_mandatory_present
+    assert OptionalHashWithMandatorySchema.new(address: { zip: 'J7W 1E1 '}).valid?
+  end
+
+  def test_optional_hash_with_mandatory_not_present
+    s = OptionalHashWithMandatorySchema.new(address: {})
+    refute s.valid?
+    assert_match /blank/, s.errors[:address][:zip][0]
+  end
+
+  def test_optional_hash_with_mandatory
+    assert OptionalHashWithMandatorySchema.new.valid?
+  end
+
+  class OptionalArrayWithMandatorySchema < Preparam::Schema
+    optional :addresses, Array do
+      mandatory :address1, String
+    end
+  end
+
+  def test_optional_hash_with_mandatory_present
+    assert OptionalArrayWithMandatorySchema.new(addresses: [{ address1: '123 Somewhere Street'}]).valid?
+  end
+
+  def test_optional_hash_with_mandatory_not_present
+    s = OptionalArrayWithMandatorySchema.new(addresses: [])
+    refute s.valid?
+    assert_match /blank/, s.errors[:addresses][0][:address1][0]
+  end
+
+  def test_optional_hash_with_mandatory
+    assert OptionalArrayWithMandatorySchema.new.valid?
   end
 end
